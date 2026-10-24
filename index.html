@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Studio Recorder</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23ff3b5c'/><circle cx='16' cy='16' r='6' fill='white'/></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="logo"></span>Studio Recorder</div>
+  <a class="btn small ghost" href="combine.html" title="Combine a Zoom face recording with a screen recording">Combine Zoom + screen →</a>
+  <div class="pills">
+    <span class="pill" id="pillScreen">Screen: not shared</span>
+    <span class="pill" id="pillCam">Camera…</span>
+    <span class="pill" id="pillMic">Mic…</span>
+    <span class="pill" id="pillAI">Face AI: idle</span>
+  </div>
+</header>
+
+<main class="app">
+  <aside class="panel">
+    <section class="card">
+      <h3>Output</h3>
+      <div class="seg" id="formatSeg">
+        <button data-format="land"><span class="ar ar-land"></span>Full video<small>16:9</small></button>
+        <button data-format="vert"><span class="ar ar-vert"></span>Reel / Short<small>9:16</small></button>
+      </div>
+      <div class="row2">
+        <label>Resolution<select id="res"></select></label>
+        <label>Frame rate<select data-key="fps" data-type="int">
+          <option value="30">30 fps</option><option value="60">60 fps</option></select></label>
+      </div>
+      <label>Quality<select data-key="quality">
+        <option value="high">High (sharp, sensible file size)</option>
+        <option value="ultra">Ultra (max bitrate)</option></select></label>
+    </section>
+
+    <section class="card">
+      <h3>Sources</h3>
+      <button class="btn wide primary-soft" id="btnScreen">Choose screen / window</button>
+      <label class="check"><input type="checkbox" data-key="sysAudio"> Record PC sound (system audio)</label>
+      <label>Camera<select id="camSel"></select></label>
+      <label>Camera quality<select data-key="camRes">
+        <option value="1280x720">720p</option>
+        <option value="1920x1080">1080p (recommended)</option>
+        <option value="3840x2160">4K (if your camera supports it)</option></select></label>
+      <label>Microphone<select id="micSel"></select></label>
+      <div class="meter" title="Mic level"><div id="meterBar"></div></div>
+    </section>
+
+    <section class="card">
+      <h3>Layout <small class="muted">keys 1–4 switch live</small></h3>
+      <div class="seg seg4" id="layoutSeg"></div>
+      <label data-show="hasScreen">Screen fit<select id="screenFit">
+        <option value="contain">Fit (show whole screen)</option>
+        <option value="cover">Fill (crop to frame)</option></select></label>
+      <label class="range" data-show="stack"><span>Split <b data-out="split"></b></span>
+        <input type="range" data-key="split" min="0.3" max="0.7" step="0.01"></label>
+      <label class="range" data-show="hasScreen"><span>Screen zoom <b data-out="sZoom"></b></span>
+        <input type="range" data-key="sZoom" min="1" max="4" step="0.05"></label>
+      <div class="row2" data-show="hasScreen">
+        <label class="range"><span>Pan ↔ <b data-out="sPanX"></b></span>
+          <input type="range" data-key="sPanX" min="0" max="1" step="0.01"></label>
+        <label class="range"><span>Pan ↕ <b data-out="sPanY"></b></span>
+          <input type="range" data-key="sPanY" min="0" max="1" step="0.01"></label>
+      </div>
+      <p class="hint" data-show="hasScreen">Tip: drag on the preview to pan a zoomed screen.</p>
+    </section>
+
+    <section class="card" data-show="hasFace">
+      <h3>Face cam</h3>
+      <div data-show="bubble">
+        <label>Shape<select data-key="shape">
+          <option value="circle">Circle</option>
+          <option value="rounded">Rounded rectangle</option>
+          <option value="square">Square</option>
+          <option value="tall">Tall card (head + body)</option>
+          <option value="cutout">Cut-out (just you, no box)</option></select></label>
+        <label class="range"><span>Face cam size <b data-out="faceSize"></b></span>
+          <input type="range" data-key="faceSize" min="0.12" max="0.7" step="0.01"></label>
+        <div class="posgrid">
+          <span>Position</span>
+          <button data-pos="tl" title="Top left">↖</button><button data-pos="tr" title="Top right">↗</button>
+          <button data-pos="bl" title="Bottom left">↙</button><button data-pos="br" title="Bottom right">↘</button>
+        </div>
+        <p class="hint">Or drag it on the preview. Scroll over it to resize.</p>
+      </div>
+      <label class="check"><input type="checkbox" data-key="autoFrame"> Auto-frame: keep my face centered</label>
+      <label class="range"><span>Zoom <b data-out="faceZoom"></b></span>
+        <input type="range" data-key="faceZoom" min="0.5" max="3" step="0.05"></label>
+      <p class="hint">Left: zoom out to show more of you (head + body). Right: enlarge your face.</p>
+      <div class="row2">
+        <label class="check"><input type="checkbox" data-key="mirror"> Mirror</label>
+        <label class="check" data-show="bubble"><input type="checkbox" data-key="border"> Border</label>
+      </div>
+    </section>
+
+    <section class="card" data-show="hasFace">
+      <h3>Background</h3>
+      <div class="seg seg3" id="bgSeg">
+        <button data-bg="none">Original</button><button data-bg="blur">Blur</button><button data-bg="color">Color</button>
+      </div>
+      <label class="range" data-show="blur"><span>Blur strength <b data-out="blurAmt"></b></span>
+        <input type="range" data-key="blurAmt" min="3" max="30" step="1"></label>
+      <label class="inline" data-show="color">Background color <input type="color" data-key="bgColor"></label>
+    </section>
+
+    <section class="card" data-show="hasFace">
+      <h3>Face beautify <small class="muted">GPU, skin only</small></h3>
+      <div class="seg seg4 presets">
+        <button data-preset="off">Off</button><button data-preset="natural">Natural</button>
+        <button data-preset="soft">Soft</button><button data-preset="glam">Glam</button>
+      </div>
+      <label class="check"><input type="checkbox" data-key="beauty"> Beautify face</label>
+      <label class="range"><span>Remove spots &amp; dark patches <b data-out="spots"></b></span>
+        <input type="range" data-key="spots" min="0" max="1" step="0.05"></label>
+      <label class="range"><span>Smooth skin <b data-out="smooth"></b></span>
+        <input type="range" data-key="smooth" min="0" max="1" step="0.05"></label>
+      <label class="range"><span>Even skin tone <b data-out="even"></b></span>
+        <input type="range" data-key="even" min="0" max="1" step="0.05"></label>
+      <label class="range"><span>Brighten face <b data-out="brighten"></b></span>
+        <input type="range" data-key="brighten" min="0" max="1" step="0.05"></label>
+      <label class="range"><span>Sharpen eyes &amp; details <b data-out="sharpen"></b></span>
+        <input type="range" data-key="sharpen" min="0" max="1" step="0.05"></label>
+      <div class="row2">
+        <button class="btn small" id="btnCompare" title="Hold to see the original camera">Hold to compare</button>
+        <label class="check"><input type="checkbox" data-key="showSkin"> Show skin area</label>
+      </div>
+      <h3 class="sub">Light &amp; colour</h3>
+      <label class="check"><input type="checkbox" data-key="autoLight"> Auto light (brighten a dark face)</label>
+      <label class="range"><span>Warmth <b data-out="warmth"></b></span>
+        <input type="range" data-key="warmth" min="0" max="1" step="0.05"></label>
+      <label class="range"><span>Contrast <b data-out="contrast"></b></span>
+        <input type="range" data-key="contrast" min="0.8" max="1.4" step="0.01"></label>
+      <label class="range"><span>Color vibrance <b data-out="saturation"></b></span>
+        <input type="range" data-key="saturation" min="0.6" max="1.6" step="0.01"></label>
+      <button class="btn small ghost" id="btnResetLook">Reset look</button>
+    </section>
+
+    <section class="card">
+      <h3>Audio</h3>
+      <label class="check"><input type="checkbox" data-key="voiceEnhance"> Voice enhance (clarity EQ + leveler)</label>
+      <label class="check"><input type="checkbox" data-key="noiseSup"> Noise suppression</label>
+      <label class="check"><input type="checkbox" data-key="echoCancel"> Echo cancellation (if using speakers)</label>
+      <label class="range"><span>Mic volume <b data-out="micGain"></b></span>
+        <input type="range" data-key="micGain" min="0" max="3" step="0.05"></label>
+      <label class="range"><span>PC sound volume <b data-out="sysGain"></b></span>
+        <input type="range" data-key="sysGain" min="0" max="1.5" step="0.05"></label>
+    </section>
+  </aside>
+
+  <section class="stage">
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="out" width="1920" height="1080"></canvas>
+      <div class="countdown" id="countdown" hidden></div>
+    </div>
+
+    <div class="recbar">
+      <button class="btn rec" id="btnRec"><span class="recdot"></span><span id="recLabel">Record</span></button>
+      <button class="btn" id="btnPause" disabled>Pause</button>
+      <button class="btn" id="btnStop" disabled>Stop</button>
+      <span class="timer" id="timer">00:00</span>
+      <label class="check compact"><input type="checkbox" data-key="countdown"> 3-sec countdown</label>
+      <span class="spacer"></span>
+      <span class="status" id="saveStatus"></span>
+      <button class="btn ghost" id="btnMini" title="Floating controls you can use while recording other windows">Mini controls</button>
+      <button class="btn ghost" id="btnFolder">Open recordings</button>
+    </div>
+    <p class="foot muted" id="footNote">Share a screen or window, pick a layout, then Record. Shortcuts: <kbd>R</kbd> record/stop · <kbd>P</kbd> pause · <kbd>1</kbd>–<kbd>4</kbd> layouts.</p>
+  </section>
+</main>
+
+<div class="toast" id="toast" hidden></div>
+<div id="hiddenHost" aria-hidden="true"></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
